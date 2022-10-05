@@ -16,9 +16,12 @@ var roll_vector = Vector2.ZERO
 onready var animation_player = $AnimationPlayer
 onready var animation_tree = $AnimationTree
 onready var animation_state = animation_tree.get("parameters/playback")
+onready var sword_hitbox = $HitboxPivot/SwordHitbox
 
 func _ready():
 	animation_tree.active = true
+	sword_hitbox.knockback_vector = roll_vector
+	# we shouldn't need the following line, but I could not disable that hitbox in the IDE
 	$HitboxPivot/SwordHitbox/CollisionShape2D.disabled = true
 
 func _physics_process(delta):
@@ -38,6 +41,7 @@ func move_state(delta):
 	
 	if input_vector != Vector2.ZERO:
 		roll_vector = input_vector
+		sword_hitbox.knockback_vector = input_vector
 		animation_tree.set("parameters/Attack/blend_position", input_vector)
 		animation_tree.set("parameters/Idle/blend_position", input_vector)
 		animation_tree.set("parameters/Roll/blend_position", input_vector)
@@ -48,7 +52,7 @@ func move_state(delta):
 		animation_state.travel("Idle")
 		velocity = velocity.move_toward(Vector2.ZERO, FRICTION)
 
-	velocity = move()
+	move()
 	
 	if Input.is_action_just_pressed("attack"):
 		state = ATTACK
