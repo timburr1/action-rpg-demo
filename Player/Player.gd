@@ -12,13 +12,16 @@ enum {
 var state = MOVE 
 var velocity = Vector2.ZERO
 var roll_vector = Vector2.ZERO
+var stats = PlayerStats
 
 onready var animation_player = $AnimationPlayer
 onready var animation_tree = $AnimationTree
 onready var animation_state = animation_tree.get("parameters/playback")
 onready var sword_hitbox = $HitboxPivot/SwordHitbox
+onready var hurtbox = $Hurtbox
 
 func _ready():
+	stats.connect("no_health", self, "queue_free")
 	animation_tree.active = true
 	sword_hitbox.knockback_vector = roll_vector
 	# we shouldn't need the following line, but I could not disable that hitbox in the IDE
@@ -77,3 +80,8 @@ func roll_state(delta):
 func roll_animation_finished():
 	velocity = Vector2.ZERO
 	state = MOVE
+
+func _on_Hurtbox_area_entered(area):
+	stats.health -= 1
+	hurtbox.start_invincibility(0.5)
+	hurtbox.create_hit_effect()

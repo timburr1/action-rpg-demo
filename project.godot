@@ -15,6 +15,10 @@ run/main_scene="res://World.tscn"
 boot_splash/image="res://SplashScreen/SplashScreen.png"
 config/icon="res://icon.png"
 
+[autoload]
+
+PlayerStats="*res://Player/PlayerStats.tscn"
+
 [display]
 
 window/size/width=320
