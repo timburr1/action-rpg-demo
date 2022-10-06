@@ -589,3 +589,7 @@ position = Vector2( 248, 24 )
 position = Vector2( 272, 88 )
 
 [node name="HealthUI" parent="." instance=ExtResource( 8 )]
+margin_left = 7.0
+margin_top = 9.0
+margin_right = 47.0
+margin_bottom = 49.0

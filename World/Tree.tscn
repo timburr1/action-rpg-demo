@@ -12,7 +12,7 @@ height = 6.0
 scale = Vector2( 0.96875, 0.95 )
 texture = ExtResource( 2 )
 
-[node name="Tree" type="Sprite" parent="."]
+[node name="TreeSprite" type="Sprite" parent="."]
 position = Vector2( 0, -15 )
 texture = ExtResource( 1 )
 
