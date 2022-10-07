@@ -1,5 +1,7 @@
 extends KinematicBody2D
 
+const PlayerHurtSound = preload("res://Music and Sounds/PlayerHurtSound.tscn")
+
 const ACCELERATION = 500
 const MAX_SPEED = 80
 const ROLL_SPEED = 1.2
@@ -14,30 +16,32 @@ var velocity = Vector2.ZERO
 var roll_vector = Vector2.ZERO
 var stats = PlayerStats
 
+onready var sprite = $Sprite
 onready var animation_player = $AnimationPlayer
 onready var animation_tree = $AnimationTree
 onready var animation_state = animation_tree.get("parameters/playback")
 onready var sword_hitbox = $HitboxPivot/SwordHitbox
 onready var hurtbox = $Hurtbox
+onready var blink_animation_player = $BlinkAnimationPlayer
 
 func _ready():
 	randomize()
 	stats.connect("no_health", self, "queue_free")
 	animation_tree.active = true
-	sword_hitbox.knockback_vector = roll_vector
-	# we shouldn't need the following line, but I could not disable that hitbox in the IDE
+	sword_hitbox.knockback_vector = roll_vector	
+	
+	# We shouldn't need the following line, but I could not disable that hitbox in the IDE
 	$HitboxPivot/SwordHitbox/CollisionShape2D.disabled = true
+	# Similarly, make sure that the blink animation is off:
+	blink_animation_player.play("Stop")
 
-func _physics_process(delta):
+func _physics_process(_delta):
 	match state:
-		MOVE: move_state(delta)
-		ROLL: roll_state(delta)
-		ATTACK: attack_state(delta)
+		MOVE: move_state()
+		ROLL: roll_state()
+		ATTACK: attack_state()
 
-func move_state(delta):
-	# if(Input.is_key_pressed(KEY_ESCAPE)):
-	#	get_tree().quit()
-		
+func move_state():
 	var input_vector = Vector2.ZERO
 	input_vector.x = Input.get_action_strength("ui_right") - Input.get_action_strength("ui_left")
 	input_vector.y = Input.get_action_strength("ui_down") - Input.get_action_strength("ui_up")		
@@ -63,7 +67,7 @@ func move_state(delta):
 	elif Input.is_action_just_pressed("roll"):
 		state = ROLL
 
-func attack_state(delta):
+func attack_state():
 	velocity = Vector2.ZERO
 	animation_state.travel("Attack")
 
@@ -73,7 +77,7 @@ func attack_animation_finished():
 func move():
 	velocity = move_and_slide(velocity)
 	
-func roll_state(delta):
+func roll_state():
 	velocity = roll_vector * MAX_SPEED * ROLL_SPEED
 	animation_state.travel("Roll")
 	move()
@@ -83,6 +87,14 @@ func roll_animation_finished():
 	state = MOVE
 
 func _on_Hurtbox_area_entered(area):
-	stats.health -= 1
+	stats.health -= area.damage
 	hurtbox.start_invincibility(0.5)
 	hurtbox.create_hit_effect()
+	var player_hurt_sound = PlayerHurtSound.instance()
+	get_tree().current_scene.add_child(player_hurt_sound)
+
+func _on_Hurtbox_invincibility_started():
+	blink_animation_player.play("Start")
+
+func _on_Hurtbox_invincibility_ended():
+	blink_animation_player.play("Stop")
